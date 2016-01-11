@@ -1,7 +1,7 @@
 class LineItemsController < ApplicationController
   include CurrentCart
   before_action :set_cart, only: [:create, :remove]
-  before_action :set_line_item, only: [:show, :edit, :update, :destroy]
+  before_action :set_line_item, only: [:show, :edit, :update, :destroy, :remove]
 
   # GET /line_items
   # GET /line_items.json
@@ -49,7 +49,6 @@ class LineItemsController < ApplicationController
   def update
     respond_to do |format|
       if @line_item.update(line_item_params)
-        format.all { head :ok, content_type: "text/html" }
         format.html { redirect_to @line_item, notice: 'Line item was successfully updated.' }
         format.json { head :no_content }
       else
@@ -67,26 +66,19 @@ class LineItemsController < ApplicationController
     cart.delete_product(product.id)
     @line_item.destroy
     respond_to do |format|
-      format.json { head :no_content }
-      if cart.line_items.count > 0
-        format.html { redirect_to store_url, notice: 'Item removed' }
-        format.js
-      else
-        format.html { redirect_to store_url, notice: 'Cart empty!' }
-      end
-      
+      format.js
+      format.html { redirect_to store_url }
     end
   end
 
   # PUT /line_items/1
   def remove
-    set_line_item
     if @line_item.quantity > 1
       product = Product.find(@line_item.product.id)
       @line_item = @cart.delete_product(product.id)
       @line_item.save!
       respond_to do |format|
-        format.html { redirect_to store_url, notice: 'Item deleted' }
+        format.html { redirect_to store_url }
         format.js { @current_item = @line_item }
         format.json { head :no_content }
       end
